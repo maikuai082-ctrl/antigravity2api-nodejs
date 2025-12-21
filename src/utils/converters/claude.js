@@ -71,7 +71,7 @@ function handleClaudeAssistantMessage(message, antigravityMessages, enableThinki
     parts.push(createThoughtPart(' '));
   }
   if (hasContent) parts.push({ text: textContent.trimEnd(), thoughtSignature: reasoningSignature });
-  if (!enableThinking) delete parts[0].thoughtSignature;
+  if (!enableThinking && parts[0]) delete parts[0].thoughtSignature;
 
   pushModelMessage({ parts, toolCalls, hasContent }, antigravityMessages);
 }
