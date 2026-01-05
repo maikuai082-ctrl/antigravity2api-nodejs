@@ -35,7 +35,7 @@
     "useContextSystemPrompt": true,
     "passSignatureToClient": false,
     "debugDumpRequestResponse": false,
-    "useCachedSignature": true,
-    "useFallbackSignature": true
+    "useCachedSignature": false,
+    "useFallbackSignature": false
   }
 }
