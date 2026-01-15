@@ -4,7 +4,7 @@
 const toastManager = {
     maxToasts: 5,
     activeToasts: [],
-    
+
     add(toast) {
         this.activeToasts.push(toast);
         // 如果超过最大数量，移除最旧的
@@ -15,14 +15,14 @@ const toastManager = {
             }
         }
     },
-    
+
     remove(toast) {
         const index = this.activeToasts.indexOf(toast);
         if (index > -1) {
             this.activeToasts.splice(index, 1);
         }
     },
-    
+
     clear() {
         for (const toast of this.activeToasts) {
             if (toast && toast.parentNode) {
@@ -50,7 +50,7 @@ function showToast(message, type = 'info', title = '') {
     `;
     document.body.appendChild(toast);
     toastManager.add(toast);
-    
+
     // 使用 requestAnimationFrame 优化动画性能
     const removeToast = () => {
         toast.style.animation = 'slideOut 0.3s ease';
@@ -61,7 +61,7 @@ function showToast(message, type = 'info', title = '') {
             }
         }, 300);
     };
-    
+
     setTimeout(removeToast, 3000);
 }
 
@@ -83,10 +83,10 @@ function showConfirm(message, title = '确认操作') {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         const cancelBtn = modal.querySelector('#confirmCancelBtn');
         const okBtn = modal.querySelector('#confirmOkBtn');
-        
+
         // 清理函数
         const cleanup = () => {
             cancelBtn.removeEventListener('click', handleCancel);
@@ -94,24 +94,24 @@ function showConfirm(message, title = '确认操作') {
             modal.removeEventListener('click', handleModalClick);
             modal.remove();
         };
-        
+
         const handleCancel = () => {
             cleanup();
             resolve(false);
         };
-        
+
         const handleOk = () => {
             cleanup();
             resolve(true);
         };
-        
+
         const handleModalClick = (e) => {
             if (e.target === modal) {
                 cleanup();
                 resolve(false);
             }
         };
-        
+
         cancelBtn.addEventListener('click', handleCancel);
         okBtn.addEventListener('click', handleOk);
         modal.addEventListener('click', handleModalClick);
@@ -124,7 +124,7 @@ let currentLoadingOverlay = null;
 function showLoading(text = '处理中...') {
     // 如果已有 loading，先移除
     hideLoading();
-    
+
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
     overlay.id = 'loadingOverlay';
@@ -140,7 +140,7 @@ function hideLoading() {
         currentLoadingOverlay.remove();
     }
     currentLoadingOverlay = null;
-    
+
     // 备用清理：通过 ID 查找
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.remove();
@@ -154,20 +154,20 @@ function switchTab(tab, saveState = true) {
     } else if (tab === 'logs') {
         document.documentElement.classList.add('tab-logs');
     }
-    
+
     // 移除所有tab的active状态
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
+
     // 找到对应的tab按钮并激活
     const targetTab = document.querySelector(`.tab[data-tab="${tab}"]`);
     if (targetTab) {
         targetTab.classList.add('active');
     }
-    
+
     const tokensPage = document.getElementById('tokensPage');
     const settingsPage = document.getElementById('settingsPage');
     const logsPage = document.getElementById('logsPage');
-    
+
     // 隐藏所有页面并移除动画类
     tokensPage.classList.add('hidden');
     tokensPage.classList.remove('page-enter');
@@ -177,12 +177,12 @@ function switchTab(tab, saveState = true) {
         logsPage.classList.add('hidden');
         logsPage.classList.remove('page-enter');
     }
-    
+
     // 清理日志页面的自动刷新（如果离开日志页面）
     if (tab !== 'logs' && typeof cleanupLogsPage === 'function') {
         cleanupLogsPage();
     }
-    
+
     // 显示对应页面并添加入场动画
     if (tab === 'tokens') {
         tokensPage.classList.remove('hidden');
@@ -211,7 +211,7 @@ function switchTab(tab, saveState = true) {
             }
         }
     }
-    
+
     // 保存当前Tab状态到localStorage
     if (saveState) {
         localStorage.setItem('currentTab', tab);

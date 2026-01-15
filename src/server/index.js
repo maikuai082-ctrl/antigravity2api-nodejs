@@ -158,6 +158,9 @@ app.use((req, res, next) => {
     '/favicon.ico',
     '/robots.txt',
     '/.well-known',
+    // 管理后台和日志
+    '/admin',
+    '/ws/logs',
     // Claude API 相关端点
     '/api/event_logging',
     '/v1/complete',

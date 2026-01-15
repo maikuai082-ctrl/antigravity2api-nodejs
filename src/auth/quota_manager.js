@@ -79,8 +79,10 @@ class QuotaManager {
     const newResetTimes = {};
     const newRequestCounts = { ...existingRequestCounts };
 
-    // 记录需要重置的组
-    const resetGroups = new Set();
+    // 记录需要重置的组（静默，不打印日志）
+    const silentResetGroups = new Set();
+    // 记录额度真正增加的组（需要打印日志）
+    const quotaIncreasedGroups = new Set();
 
     // 记录每个组的最低额度，用于检测额度增加
     const groupMinRemaining = {};
@@ -105,16 +107,16 @@ class QuotaManager {
           newResetTimes[groupKey] = resetTimeRaw;
         }
 
-        // 如果重置时间变化（新的重置周期），标记该组需要重置
-        if (oldResetMs && newResetMs > oldResetMs && !resetGroups.has(groupKey)) {
+        // 如果重置时间变化（新的重置周期），静默重置计数
+        if (oldResetMs && newResetMs > oldResetMs && !silentResetGroups.has(groupKey)) {
           newRequestCounts[groupKey] = 0;
-          resetGroups.add(groupKey);
+          silentResetGroups.add(groupKey);
         }
 
-        // 如果当前时间已超过重置时间，也重置计数
+        // 如果当前时间已超过重置时间，也静默重置计数
         if (newResetMs && Date.now() > newResetMs && existingRequestCounts[groupKey] > 0) {
           newRequestCounts[groupKey] = 0;
-          resetGroups.add(groupKey);
+          silentResetGroups.add(groupKey);
         }
       }
     });
@@ -134,16 +136,16 @@ class QuotaManager {
       const newMin = groupMinRemaining[groupKey];
       const oldMin = existingGroupMinRemaining[groupKey];
 
-      // 只有当旧数据存在且新额度明显高于旧额度时才重置（允许小幅波动）
-      if (oldMin !== undefined && newMin > oldMin + 0.05 && !resetGroups.has(groupKey)) {
+      // 只有当旧数据存在且新额度明显高于旧额度时才标记为额度增加
+      if (oldMin !== undefined && newMin > oldMin + 0.05) {
         newRequestCounts[groupKey] = 0;
-        resetGroups.add(groupKey);
+        quotaIncreasedGroups.add(groupKey);
       }
     }
 
-    // 输出合并后的日志
-    if (resetGroups.size > 0) {
-      log.info(`[QuotaManager] 额度重置，清零请求计数: ${Array.from(resetGroups).join(', ')}`);
+    // 只有额度真正增加时才打印日志
+    if (quotaIncreasedGroups.size > 0) {
+      log.info(`[QuotaManager] 额度重置，清零请求计数: ${Array.from(quotaIncreasedGroups).join(', ')}`);
     }
 
     this.cache.set(refreshToken, {

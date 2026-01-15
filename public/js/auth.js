@@ -46,7 +46,7 @@ function silentLogout() {
 async function logout() {
     const confirmed = await showConfirm('确定要退出登录吗？', '退出确认');
     if (!confirmed) return;
-    
+
     try {
         // 调用后端登出接口清除 Cookie
         await fetch('/admin/logout', {
@@ -56,7 +56,7 @@ async function logout() {
     } catch (e) {
         // 忽略错误
     }
-    
+
     silentLogout();
     showToast('已退出登录', 'info');
 }
@@ -118,20 +118,20 @@ async function processOAuthCallbackModal() {
         showToast('请输入回调URL', 'warning');
         return;
     }
-    
+
     showLoading('正在处理授权...');
-    
+
     try {
         const url = new URL(callbackUrl);
         const code = url.searchParams.get('code');
         const port = new URL(url.origin).port || (url.protocol === 'https:' ? 443 : 80);
-        
+
         if (!code) {
             hideLoading();
             showToast('URL中未找到授权码', 'error');
             return;
         }
-        
+
         const response = await authFetch('/admin/oauth/exchange', {
             method: 'POST',
             headers: {
@@ -139,7 +139,7 @@ async function processOAuthCallbackModal() {
             },
             body: JSON.stringify({ code, port })
         });
-        
+
         const result = await response.json();
         if (result.success) {
             const account = result.data;
@@ -150,7 +150,7 @@ async function processOAuthCallbackModal() {
                 },
                 body: JSON.stringify(account)
             });
-            
+
             const addResult = await addResponse.json();
             hideLoading();
             if (addResult.success) {
