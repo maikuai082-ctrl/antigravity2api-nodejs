@@ -63,9 +63,25 @@ export function cleanParameters(obj) {
   const cleaned = Array.isArray(obj) ? [] : {};
   for (const [key, value] of Object.entries(obj)) {
     if (EXCLUDED_KEYS.has(key)) continue;
-    if (key === 'type' && typeof value === 'string') {
-      // 将 type 值转换为大写以匹配官方 API 格式
-      cleaned[key] = TYPE_UPPERCASE_MAP[value.toLowerCase()] || value.toUpperCase();
+    if (key === 'type') {
+      // 处理 type 字段
+      if (typeof value === 'string') {
+        // 字符串类型：转换为大写
+        cleaned[key] = TYPE_UPPERCASE_MAP[value.toLowerCase()] || value.toUpperCase();
+      } else if (Array.isArray(value)) {
+        // 数组类型（如 ["string", "null"]）：取第一个非 null 的类型
+        // Gemini API 不支持联合类型，需要转换为单一类型
+        const nonNullType = value.find(t => t !== 'null' && t !== null);
+        if (nonNullType && typeof nonNullType === 'string') {
+          cleaned[key] = TYPE_UPPERCASE_MAP[nonNullType.toLowerCase()] || nonNullType.toUpperCase();
+        } else {
+          // 如果都是 null 或找不到有效类型，默认为 STRING
+          cleaned[key] = 'STRING';
+        }
+      } else {
+        // 其他情况，保持原值
+        cleaned[key] = value;
+      }
     } else {
       cleaned[key] = (value && typeof value === 'object') ? cleanParameters(value) : value;
     }
